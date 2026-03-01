@@ -84,3 +84,14 @@ class Lead:
         lead = cls.get_lead_by_id(lead_id)
         if lead:
             cls.leads.remove(lead)
+    @classmethod
+    def update_lead(cls, lead_id, name, email, company, value, source, status=None):
+        lead = cls.get_lead_by_id(lead_id)
+        if lead:
+            lead.name = name
+            lead.email = email
+            lead.company = company
+            lead.value = value
+            lead.source = source
+        if status is not None:
+            lead.status = status

@@ -104,6 +104,35 @@ def lead_detail(lead_id):
         return redirect(url_for('leads'))
     return render_template('lead_detail.html', lead=lead)
 
+@app.route('/leads/<int:lead_id>/edit', methods=['GET', 'POST'])
+def edit_lead(lead_id):
+    lead = Lead.get_lead_by_id(lead_id)
+    if not lead:
+        flash('Lead not found!', 'error')
+        return redirect(url_for('leads'))
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        company = request.form.get('company')
+        value = request.form.get('value')
+        source = request.form.get('source')
+        status = request.form.get('status', lead.status)
+
+        if not all([name, email, company, value, source]):
+            flash('All fields are required!', 'error')
+            return redirect(url_for('edit_lead', lead_id=lead_id))
+
+        try:
+            Lead.update_lead(lead_id, name, email, company, float(value), source, status)
+            flash('Lead updated successfully!', 'success')
+            return redirect(url_for('lead_detail', lead_id=lead_id))
+        except ValueError:
+            flash('Deal value must be a number!', 'error')
+            return redirect(url_for('edit_lead', lead_id=lead_id))
+
+    return render_template('edit_lead.html', lead=lead)
+
 @app.route('/leads/<int:lead_id>/delete', methods=['POST'])
 def delete_lead(lead_id):
     Lead.delete_lead(lead_id)
