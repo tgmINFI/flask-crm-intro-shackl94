@@ -84,3 +84,43 @@ class Lead:
         lead = cls.get_lead_by_id(lead_id)
         if lead:
             cls.leads.remove(lead)
+    @classmethod
+    def update_lead(cls, lead_id, name, email, company, value, source, status=None):
+        lead = cls.get_lead_by_id(lead_id)
+        if lead:
+            lead.name = name
+            lead.email = email
+            lead.company = company
+            lead.value = value
+            lead.source = source
+        if status is not None:
+            lead.status = status
+
+class Contact:
+    contacts = []
+    next_id = 1
+
+    def __init__(self, customer_id, contact_type, notes):
+        self.id = Contact.next_id
+        Contact.next_id += 1
+        self.customer_id = customer_id
+        self.contact_type = contact_type
+        self.notes = notes
+
+    @classmethod
+    def add_contact(cls, customer_id, contact_type, notes):
+        contact = cls(customer_id, contact_type, notes)
+        cls.contacts.append(contact)
+        return contact
+
+    @classmethod
+    def get_contacts_by_customer_id(cls, customer_id):
+        return [c for c in cls.contacts if c.customer_id == customer_id]
+
+    @classmethod
+    def delete_contact(cls, contact_id):
+        for c in cls.contacts:
+            if c.id == contact_id:
+                cls.contacts.remove(c)
+                return True
+        return False
