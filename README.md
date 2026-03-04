@@ -1,10 +1,10 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/qT0oNHQU)
-# Flask CRM System
+## Projektziel
 
-## Setup
+Erweiterung des bestehenden Flask-CRM-Systems um:
 
-1. `python -m venv venv`
-2. `source venv/bin/activate`
-3. `pip install -r requirements.txt`
-4. `python app.py`
-5. Visit http://127.0.0.1:5000
+- Datenbank (SQLite + SQLAlchemy)
+- Benutzer-Authentifizierung
+- REST API
+- Aufgaben- und Terminverwaltung (Erweiterung 9)
+
+Das Projekt wird schrittweise entwickelt, versioniert mit Git und geplant in Jira.
