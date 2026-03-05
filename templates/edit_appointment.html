@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Edit Appointment{% if customer %} for {{ customer.name }}{% endif %}</h1>
+
+<form method="POST">
+  <div class="mb-3">
+    <label class="form-label">Start</label>
+    <input class="form-control" name="start_datetime" value="{{ appointment.start_datetime }}" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">End</label>
+    <input class="form-control" name="end_datetime" value="{{ appointment.end_datetime }}">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Notes</label>
+    <textarea class="form-control" name="notes">{{ appointment.notes }}</textarea>
+  </div>
+
+  <button class="btn btn-primary" type="submit">Save</button>
+  <a class="btn btn-secondary" href="{{ url_for('appointments_for_customer', customer_id=appointment.customer_id) }}">Cancel</a>
+</form>
+{% endblock %}

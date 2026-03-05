@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Tasks for {{ customer.name }}</h1>
+
+<p>
+  <a class="btn btn-primary" href="{{ url_for('add_task', customer_id=customer.id) }}">+ Add Task</a>
+  <a class="btn btn-secondary" href="{{ url_for('customer_detail', customer_id=customer.id) }}">Back to Customer</a>
+</p>
+
+{% if tasks and tasks|length > 0 %}
+<table class="table">
+  <tr>
+    <th>Title</th>
+    <th>Due</th>
+    <th>Status</th>
+    <th>Actions</th>
+  </tr>
+  {% for t in tasks %}
+  <tr>
+    <td>{{ t.title }}</td>
+    <td>{{ t.due_date }}</td>
+    <td>{{ t.status }}</td>
+    <td>
+      <a class="btn btn-sm btn-secondary" href="{{ url_for('edit_task', task_id=t.id) }}">Edit</a>
+      {% if t.status != 'done' %}
+      <form method="POST" action="{{ url_for('done_task', task_id=t.id) }}" style="display:inline;">
+        <button class="btn btn-sm btn-success" type="submit">Done</button>
+      </form>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>No tasks yet.</p>
+{% endif %}
+
+{% endblock %}

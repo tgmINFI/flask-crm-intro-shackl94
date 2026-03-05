@@ -124,3 +124,88 @@ class Contact:
                 cls.contacts.remove(c)
                 return True
         return False
+    
+class Task:
+    tasks = []
+    next_id = 1
+
+    def __init__(self, customer_id, title, description="", due_date="", status="open"):
+        self.id = Task.next_id
+        Task.next_id += 1
+        self.customer_id = customer_id
+        self.title = title
+        self.description = description
+        self.due_date = due_date  # string (z.B. "2026-03-10") reicht für in-memory
+        self.status = status      # "open" oder "done"
+
+    @classmethod
+    def add_task(cls, customer_id, title, description="", due_date=""):
+        task = cls(customer_id, title, description, due_date, status="open")
+        cls.tasks.append(task)
+        return task
+
+    @classmethod
+    def get_task_by_id(cls, task_id):
+        for t in cls.tasks:
+            if t.id == task_id:
+                return t
+        return None
+
+    @classmethod
+    def get_tasks_by_customer_id(cls, customer_id):
+        return [t for t in cls.tasks if t.customer_id == customer_id]
+
+    @classmethod
+    def update_task(cls, task_id, title, description, due_date, status):
+        t = cls.get_task_by_id(task_id)
+        if t:
+            t.title = title
+            t.description = description
+            t.due_date = due_date
+            t.status = status
+
+    @classmethod
+    def mark_done(cls, task_id):
+        t = cls.get_task_by_id(task_id)
+        if t:
+            t.status = "done"
+            return True
+        return False
+
+
+class Appointment:
+    appointments = []
+    next_id = 1
+
+    def __init__(self, customer_id, start_datetime, end_datetime="", notes=""):
+        self.id = Appointment.next_id
+        Appointment.next_id += 1
+        self.customer_id = customer_id
+        self.start_datetime = start_datetime  # string z.B. "2026-03-12T14:00"
+        self.end_datetime = end_datetime      # optional
+        self.notes = notes
+
+    @classmethod
+    def add_appointment(cls, customer_id, start_datetime, end_datetime="", notes=""):
+        a = cls(customer_id, start_datetime, end_datetime, notes)
+        cls.appointments.append(a)
+        return a
+
+    @classmethod
+    def get_appointment_by_id(cls, appointment_id):
+        for a in cls.appointments:
+            if a.id == appointment_id:
+                return a
+        return None
+
+    @classmethod
+    def get_appointments_by_customer_id(cls, customer_id):
+        return [a for a in cls.appointments if a.customer_id == customer_id]
+
+    @classmethod
+    def update_appointment(cls, appointment_id, start_datetime, end_datetime, notes):
+        a = cls.get_appointment_by_id(appointment_id)
+        if a:
+            a.start_datetime = start_datetime
+            a.end_datetime = end_datetime
+            a.notes = notes

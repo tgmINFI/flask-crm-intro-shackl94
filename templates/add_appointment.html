@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Add Appointment for {{ customer.name }}</h1>
+
+<form method="POST">
+  <div class="mb-3">
+    <label class="form-label">Start (required)</label>
+    <input class="form-control" name="start_datetime" placeholder="YYYY-MM-DDTHH:MM" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">End (optional)</label>
+    <input class="form-control" name="end_datetime" placeholder="YYYY-MM-DDTHH:MM">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Notes</label>
+    <textarea class="form-control" name="notes"></textarea>
+  </div>
+
+  <button class="btn btn-primary" type="submit">Save</button>
+  <a class="btn btn-secondary" href="{{ url_for('appointments_for_customer', customer_id=customer.id) }}">Cancel</a>
+</form>
+{% endblock %}

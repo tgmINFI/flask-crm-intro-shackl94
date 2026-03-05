@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from models import Customer, Lead, Contact
+from models import Customer, Lead, Contact, Task, Appointment
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-this'
@@ -82,7 +82,8 @@ def customer_detail(customer_id):
     if not customer:
         flash('Customer not found!', 'error')
         return redirect(url_for('customers'))
-        contacts = Contact.get_contacts_by_customer_id(customer_id)
+
+    contacts = Contact.get_contacts_by_customer_id(customer_id)
     return render_template('customer_detail.html', customer=customer, contacts=contacts)
 
 @app.route('/customers/<int:customer_id>/contacts/add', methods=['GET', 'POST'])
@@ -190,6 +191,117 @@ def edit_lead(lead_id):
 
     return render_template('edit_lead.html', lead=lead)
 
+@app.route('/customers/<int:customer_id>/tasks/add', methods=['GET', 'POST'])
+def add_task(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        flash('Customer not found!', 'error')
+        return redirect(url_for('customers'))
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description', '')
+        due_date = request.form.get('due_date', '')
+
+        if not title or not title.strip():
+            flash('Title is required!', 'error')
+            return redirect(url_for('add_task', customer_id=customer_id))
+
+        Task.add_task(customer_id, title.strip(), description, due_date)
+        flash('Task added successfully!', 'success')
+        return redirect(url_for('tasks_for_customer', customer_id=customer_id))
+
+    return render_template('add_task.html', customer=customer)
+
+@app.route('/tasks/<int:task_id>/edit', methods=['GET', 'POST'])
+def edit_task(task_id):
+    task = Task.get_task_by_id(task_id)
+    if not task:
+        flash('Task not found!', 'error')
+        return redirect(url_for('customers'))
+
+    customer = Customer.get_customer_by_id(task.customer_id)
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description', '')
+        due_date = request.form.get('due_date', '')
+        status = request.form.get('status', task.status)
+
+        if not title or not title.strip():
+            flash('Title is required!', 'error')
+            return redirect(url_for('edit_task', task_id=task_id))
+
+        Task.update_task(task_id, title.strip(), description, due_date, status)
+        flash('Task updated successfully!', 'success')
+        return redirect(url_for('tasks_for_customer', customer_id=task.customer_id))
+
+    return render_template('edit_task.html', task=task, customer=customer)
+
+@app.route('/tasks/<int:task_id>/done', methods=['POST'])
+def done_task(task_id):
+    task = Task.get_task_by_id(task_id)
+    if not task:
+        flash('Task not found!', 'error')
+        return redirect(url_for('customers'))
+
+    Task.mark_done(task_id)
+    flash('Task marked as done!', 'success')
+    return redirect(url_for('tasks_for_customer', customer_id=task.customer_id))
+@app.route('/customers/<int:customer_id>/appointments')
+def appointments_for_customer(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        flash('Customer not found!', 'error')
+        return redirect(url_for('customers'))
+
+    appointments = Appointment.get_appointments_by_customer_id(customer_id)
+    return render_template('appointments.html', customer=customer, appointments=appointments)
+@app.route('/customers/<int:customer_id>/appointments/add', methods=['GET', 'POST'])
+def add_appointment(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        flash('Customer not found!', 'error')
+        return redirect(url_for('customers'))
+
+    if request.method == 'POST':
+        start_datetime = request.form.get('start_datetime')
+        end_datetime = request.form.get('end_datetime', '')
+        notes = request.form.get('notes', '')
+
+        if not start_datetime or not start_datetime.strip():
+            flash('Start date/time is required!', 'error')
+            return redirect(url_for('add_appointment', customer_id=customer_id))
+
+        Appointment.add_appointment(customer_id, start_datetime.strip(), end_datetime.strip(), notes)
+        flash('Appointment added successfully!', 'success')
+        return redirect(url_for('appointments_for_customer', customer_id=customer_id))
+
+    return render_template('add_appointment.html', customer=customer)
+@app.route('/appointments/<int:appointment_id>/edit', methods=['GET', 'POST'])
+def edit_appointment(appointment_id):
+    appointment = Appointment.get_appointment_by_id(appointment_id)
+    if not appointment:
+        flash('Appointment not found!', 'error')
+        return redirect(url_for('customers'))
+
+    customer = Customer.get_customer_by_id(appointment.customer_id)
+
+    if request.method == 'POST':
+        start_datetime = request.form.get('start_datetime')
+        end_datetime = request.form.get('end_datetime', '')
+        notes = request.form.get('notes', '')
+
+        if not start_datetime or not start_datetime.strip():
+            flash('Start date/time is required!', 'error')
+            return redirect(url_for('edit_appointment', appointment_id=appointment_id))
+
+        Appointment.update_appointment(appointment_id, start_datetime.strip(), end_datetime.strip(), notes)
+        flash('Appointment updated successfully!', 'success')
+        return redirect(url_for('appointments_for_customer', customer_id=appointment.customer_id))
+
+    return render_template('edit_appointment.html', appointment=appointment, customer=customer)
+
 @app.route('/leads/<int:lead_id>/delete', methods=['POST'])
 def delete_lead(lead_id):
     Lead.delete_lead(lead_id)
@@ -272,6 +384,141 @@ def api_create_customer_contact(customer_id):
     contact = Contact.add_contact(customer_id, data["contact_type"], data["notes"])
     return jsonify(contact_to_dict(contact)), 201
 
+@app.route('/customers/<int:customer_id>/tasks')
+def tasks_for_customer(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        flash('Customer not found!', 'error')
+        return redirect(url_for('customers'))
+
+    tasks = Task.get_tasks_by_customer_id(customer_id)
+    return render_template('tasks.html', customer=customer, tasks=tasks)
+
+def task_to_dict(t):
+    return {
+        "id": t.id,
+        "customer_id": t.customer_id,
+        "title": t.title,
+        "description": t.description,
+        "due_date": t.due_date,
+        "status": t.status
+    }
+
+def appointment_to_dict(a):
+    return {
+        "id": a.id,
+        "customer_id": a.customer_id,
+        "start_datetime": a.start_datetime,
+        "end_datetime": a.end_datetime,
+        "notes": a.notes
+    }
+
+@app.route('/api/customers/<int:customer_id>/tasks', methods=['GET'])
+def api_get_tasks(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        return jsonify({"error": "Customer not found"}), 404
+    tasks = Task.get_tasks_by_customer_id(customer_id)
+    return jsonify([task_to_dict(t) for t in tasks]), 200
+
+@app.route('/api/customers/<int:customer_id>/tasks', methods=['POST'])
+def api_create_task(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        return jsonify({"error": "Customer not found"}), 404
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    title = (data.get("title") or "").strip()
+    if not title:
+        return jsonify({"error": "title is required"}), 400
+
+    description = data.get("description", "")
+    due_date = data.get("due_date", "")
+
+    t = Task.add_task(customer_id, title, description, due_date)
+    return jsonify(task_to_dict(t)), 201
+
+@app.route('/api/tasks/<int:task_id>', methods=['PUT'])
+def api_update_task(task_id):
+    t = Task.get_task_by_id(task_id)
+    if not t:
+        return jsonify({"error": "Task not found"}), 404
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    title = (data.get("title") or t.title).strip()
+    if not title:
+        return jsonify({"error": "title is required"}), 400
+
+    description = data.get("description", t.description)
+    due_date = data.get("due_date", t.due_date)
+    status = data.get("status", t.status)
+
+    Task.update_task(task_id, title, description, due_date, status)
+    t2 = Task.get_task_by_id(task_id)
+    return jsonify(task_to_dict(t2)), 200
+
+@app.route('/api/tasks/<int:task_id>/done', methods=['POST'])
+def api_done_task(task_id):
+    ok = Task.mark_done(task_id)
+    if not ok:
+        return jsonify({"error": "Task not found"}), 404
+    t = Task.get_task_by_id(task_id)
+    return jsonify(task_to_dict(t)), 200
+
+@app.route('/api/customers/<int:customer_id>/appointments', methods=['GET'])
+def api_get_appointments(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        return jsonify({"error": "Customer not found"}), 404
+    apps = Appointment.get_appointments_by_customer_id(customer_id)
+    return jsonify([appointment_to_dict(a) for a in apps]), 200
+
+@app.route('/api/customers/<int:customer_id>/appointments', methods=['POST'])
+def api_create_appointment(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        return jsonify({"error": "Customer not found"}), 404
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    start_datetime = (data.get("start_datetime") or "").strip()
+    if not start_datetime:
+        return jsonify({"error": "start_datetime is required"}), 400
+
+    end_datetime = (data.get("end_datetime") or "").strip()
+    notes = data.get("notes", "")
+
+    a = Appointment.add_appointment(customer_id, start_datetime, end_datetime, notes)
+    return jsonify(appointment_to_dict(a)), 201
+
+@app.route('/api/appointments/<int:appointment_id>', methods=['PUT'])
+def api_update_appointment(appointment_id):
+    a = Appointment.get_appointment_by_id(appointment_id)
+    if not a:
+        return jsonify({"error": "Appointment not found"}), 404
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    start_datetime = (data.get("start_datetime") or a.start_datetime).strip()
+    if not start_datetime:
+        return jsonify({"error": "start_datetime is required"}), 400
+
+    end_datetime = (data.get("end_datetime") or a.end_datetime).strip()
+    notes = data.get("notes", a.notes)
+
+    Appointment.update_appointment(appointment_id, start_datetime, end_datetime, notes)
+    a2 = Appointment.get_appointment_by_id(appointment_id)
+    return jsonify(appointment_to_dict(a2)), 200
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -361,3 +608,94 @@ def api_delete_lead(lead_id):
         return jsonify({"error": "Lead could not be deleted"}), 400
 
     return jsonify({"message": "Lead deleted"}), 200
+
+def task_to_dict(t):
+    return {"id": t.id, "customer_id": t.customer_id, "title": t.title,
+            "description": t.description, "due_date": t.due_date, "status": t.status}
+
+def appointment_to_dict(a):
+    return {"id": a.id, "customer_id": a.customer_id, "start_datetime": a.start_datetime,
+            "end_datetime": a.end_datetime, "notes": a.notes}
+
+@app.route('/api/customers/<int:customer_id>/tasks', methods=['GET'])
+def api_get_tasks(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        return jsonify({"error": "Customer not found"}), 404
+    return jsonify([task_to_dict(t) for t in Task.get_tasks_by_customer_id(customer_id)]), 200
+
+@app.route('/api/customers/<int:customer_id>/tasks', methods=['POST'])
+def api_create_task(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        return jsonify({"error": "Customer not found"}), 404
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+    title = (data.get("title") or "").strip()
+    if not title:
+        return jsonify({"error": "title is required"}), 400
+    t = Task.add_task(customer_id, title, data.get("description",""), data.get("due_date",""))
+    return jsonify(task_to_dict(t)), 201
+
+@app.route('/api/tasks/<int:task_id>', methods=['PUT'])
+def api_update_task(task_id):
+    t = Task.get_task_by_id(task_id)
+    if not t:
+        return jsonify({"error": "Task not found"}), 404
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+    title = (data.get("title") or t.title).strip()
+    if not title:
+        return jsonify({"error": "title is required"}), 400
+    Task.update_task(task_id, title, data.get("description", t.description),
+                     data.get("due_date", t.due_date), data.get("status", t.status))
+    return jsonify(task_to_dict(Task.get_task_by_id(task_id))), 200
+
+@app.route('/api/tasks/<int:task_id>/done', methods=['POST'])
+def api_done_task(task_id):
+    ok = Task.mark_done(task_id)
+    if not ok:
+        return jsonify({"error": "Task not found"}), 404
+    return jsonify(task_to_dict(Task.get_task_by_id(task_id))), 200
+
+
+@app.route('/api/customers/<int:customer_id>/appointments', methods=['GET'])
+def api_get_appointments(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        return jsonify({"error": "Customer not found"}), 404
+    return jsonify([appointment_to_dict(a) for a in Appointment.get_appointments_by_customer_id(customer_id)]), 200
+
+@app.route('/api/customers/<int:customer_id>/appointments', methods=['POST'])
+def api_create_appointment(customer_id):
+    customer = Customer.get_customer_by_id(customer_id)
+    if not customer:
+        return jsonify({"error": "Customer not found"}), 404
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+    start_datetime = (data.get("start_datetime") or "").strip()
+    if not start_datetime:
+        return jsonify({"error": "start_datetime is required"}), 400
+    a = Appointment.add_appointment(customer_id, start_datetime,
+                                    (data.get("end_datetime") or "").strip(),
+                                    data.get("notes",""))
+    return jsonify(appointment_to_dict(a)), 201
+
+@app.route('/api/appointments/<int:appointment_id>', methods=['PUT'])
+def api_update_appointment(appointment_id):
+    a = Appointment.get_appointment_by_id(appointment_id)
+    if not a:
+        return jsonify({"error": "Appointment not found"}), 404
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+    start_datetime = (data.get("start_datetime") or a.start_datetime).strip()
+    if not start_datetime:
+        return jsonify({"error": "start_datetime is required"}), 400
+    Appointment.update_appointment(appointment_id, start_datetime,
+                                   (data.get("end_datetime") or a.end_datetime).strip(),
+                                   data.get("notes", a.notes))
+    return jsonify(appointment_to_dict(Appointment.get_appointment_by_id(appointment_id))), 200

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Add Task for {{ customer.name }}</h1>
+
+<form method="POST">
+  <div class="mb-3">
+    <label class="form-label">Title</label>
+    <input class="form-control" name="title" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Due date (optional)</label>
+    <input class="form-control" name="due_date" placeholder="YYYY-MM-DD">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Description</label>
+    <textarea class="form-control" name="description"></textarea>
+  </div>
+
+  <button class="btn btn-primary" type="submit">Save</button>
+  <a class="btn btn-secondary" href="{{ url_for('tasks_for_customer', customer_id=customer.id) }}">Cancel</a>
+</form>
+{% endblock %}
