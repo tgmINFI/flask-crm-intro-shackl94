@@ -4,13 +4,13 @@
 
 <form method="POST">
   <div class="mb-3">
-    <label class="form-label">Start</label>
-    <input class="form-control" name="start_datetime" value="{{ appointment.start_datetime }}" required>
+  <label class="form-label">Date</label>
+  <input class="form-control" type="date" name="start_datetime" value="{{ appointment.start_datetime }}" required>
   </div>
 
   <div class="mb-3">
-    <label class="form-label">End</label>
-    <input class="form-control" name="end_datetime" value="{{ appointment.end_datetime }}">
+  <label class="form-label">End date</label>
+  <input class="form-control" type="date" name="end_datetime" value="{{ appointment.end_datetime }}">
   </div>
 
   <div class="mb-3">
