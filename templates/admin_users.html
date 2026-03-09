@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">User Management</h1>
+
+    {% if users %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-bordered table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Benutzername</th>
+                        <th>E-Mail</th>
+                        <th>Rolle</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('change_user_role', user_id=user.id) }}" class="d-flex gap-2">
+                                <select name="role" class="form-select form-select-sm" style="max-width: 120px;">
+                                    <option value="user" {% if user.role == "user" %}selected{% endif %}>User</option>
+                                    <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Admin</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">Speichern</button>
+                            </form>
+                        </td>
+                        <td>
+                            {% if user.id != current_user.id %}
+                            <form method="POST"
+                                  action="{{ url_for('delete_user', user_id=user.id) }}"
+                                  onsubmit="return confirm('Benutzer wirklich löschen?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Löschen</button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted">Eigener Account</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        Keine Benutzer vorhanden.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

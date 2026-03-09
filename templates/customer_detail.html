@@ -2,99 +2,99 @@
 
 {% block content %}
 <div class="container mt-4">
-
-  <!-- Header / Customer info -->
-  <div class="card mb-4 shadow-sm">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-start">
-        <div>
-          <h1 class="mb-3">{{ customer.name }}</h1>
-
-          <div class="row">
-            <div class="col-md-6">
-              <p class="mb-1"><strong>Email:</strong> {{ customer.email }}</p>
-              <p class="mb-1"><strong>Company:</strong> {{ customer.company }}</p>
-            </div>
-            <div class="col-md-6">
-              <p class="mb-1"><strong>Phone:</strong> {{ customer.phone }}</p>
-              <p class="mb-1"><strong>Status:</strong> {{ customer.status }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Top actions -->
-        <div class="btn-group" role="group" aria-label="Customer actions">
-          <a href="{{ url_for('edit_customer', customer_id=customer.id) }}" class="btn btn-primary">Edit</a>
-
-          <form method="POST" action="{{ url_for('delete_customer', customer_id=customer.id) }}" style="display:inline;">
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this customer?')">Delete</button>
-          </form>
-
-          <a href="{{ url_for('customers') }}" class="btn btn-secondary">Back</a>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-
-    <!-- Actions / Quick links -->
-    <div class="col-md-6 mb-4">
-      <div class="card shadow-sm h-100">
+    <div class="card mb-4 shadow-sm">
         <div class="card-body">
-          <h4 class="card-title mb-3">Actions</h4>
-          <p class="text-muted mb-3">Manage tasks and appointments for this customer.</p>
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="mb-3">{{ customer.name }}</h1>
 
-          <div class="d-flex gap-2 flex-wrap">
-            <a class="btn btn-outline-primary" href="{{ url_for('tasks_for_customer', customer_id=customer.id) }}">
-              Tasks
-            </a>
-            <a class="btn btn-outline-primary" href="{{ url_for('appointments_for_customer', customer_id=customer.id) }}">
-              Appointments
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Email:</strong> {{ customer.email }}</p>
+                            <p class="mb-1"><strong>Company:</strong> {{ customer.company }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Phone:</strong> {{ customer.phone }}</p>
+                            <p class="mb-1"><strong>Status:</strong> {{ customer.status }}</p>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- Contacts -->
-    <div class="col-md-6 mb-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="card-title mb-0">Contacts</h4>
-            <a href="{{ url_for('add_contact', customer_id=customer.id) }}" class="btn btn-primary">
-              + Add Contact
-            </a>
-          </div>
+                <div class="btn-group" role="group">
+                    <a href="{{ url_for('edit_customer', customer_id=customer.id) }}" class="btn btn-primary">Edit</a>
 
-          {% if contacts and contacts|length > 0 %}
-            <div class="table-responsive">
-              <table class="table table-sm table-striped align-middle">
-                <thead>
-                  <tr>
-                    <th style="width: 30%;">Type</th>
-                    <th>Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for c in contacts %}
-                  <tr>
-                    <td>{{ c.contact_type }}</td>
-                    <td>{{ c.notes }}</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+                    {% if current_user.role == "admin" %}
+                    <form method="POST"
+                          action="{{ url_for('delete_customer', customer_id=customer.id) }}"
+                          style="display:inline;">
+                        <button type="submit"
+                                class="btn btn-danger"
+                                onclick="return confirm('Delete this customer?')">
+                            Delete
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <a href="{{ url_for('customers') }}" class="btn btn-secondary">Back</a>
+                </div>
             </div>
-          {% else %}
-            <p class="text-muted mb-0">No contacts yet.</p>
-          {% endif %}
         </div>
-      </div>
     </div>
 
-  </div>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Actions</h4>
+                    <p class="text-muted mb-3">Manage tasks and appointments for this customer.</p>
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a class="btn btn-outline-primary" href="{{ url_for('tasks_for_customer', customer_id=customer.id) }}">
+                            Tasks
+                        </a>
+                        <a class="btn btn-outline-primary" href="{{ url_for('appointments_for_customer', customer_id=customer.id) }}">
+                            Appointments
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="card-title mb-0">Contacts</h4>
+                        <a href="{{ url_for('add_contact', customer_id=customer.id) }}" class="btn btn-primary">
+                            + Add Contact
+                        </a>
+                    </div>
+
+                    {% if contacts %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in contacts %}
+                                <tr>
+                                    <td>{{ c.contact_type }}</td>
+                                    <td>{{ c.notes }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No contacts yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
