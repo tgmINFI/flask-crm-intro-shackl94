@@ -573,13 +573,18 @@ def edit_appointment(appointment_id):
 
     return render_template("edit_appointment.html", appointment=appointment, customer=customer)
 
-
+# Diese Route definiert eine URL im Webserver.
+# Wenn jemand im Browser /api/docs aufruft,
+# wird die Funktion api_docs() ausgeführt. Damit kann leichter nochvollzogen werden,welche apis existieren.
 @app.route("/api/docs")
 def api_docs():
     return jsonify({
+        # Allgemeine Beschreibung der API
         "description": "CRM REST API",
         "authentication": "Session-based login required for protected endpoints",
+        # Hier werden die verschiedenen API-Endpunkte dokumentiert.
         "endpoints": {
+            # Beschreibung der Customer API
             "customers": {
                 "GET /api/customers": "Alle Kunden abrufen",
                 "GET /api/customers/<id>": "Einen Kunden abrufen",
@@ -587,10 +592,12 @@ def api_docs():
                 "PUT /api/customers/<id>": "Kunden aktualisieren",
                 "DELETE /api/customers/<id>": "Kunden löschen (Admin)"
             },
+            # Beschreibung der Kontakte
             "contacts": {
                 "GET /api/customers/<customer_id>/contacts": "Kontakte eines Kunden abrufen",
                 "POST /api/customers/<customer_id>/contacts": "Kontakt anlegen"
             },
+            # Beschreibung der Leads API
             "leads": {
                 "GET /api/leads": "Alle Leads abrufen",
                 "GET /api/leads/<id>": "Einen Lead abrufen",
@@ -598,12 +605,14 @@ def api_docs():
                 "PUT /api/leads/<id>": "Lead aktualisieren",
                 "DELETE /api/leads/<id>": "Lead löschen (Admin)"
             },
+            # Beschreibung der Tasks API
             "tasks": {
                 "GET /api/customers/<customer_id>/tasks": "Tasks eines Kunden abrufen",
                 "POST /api/customers/<customer_id>/tasks": "Task anlegen",
                 "PUT /api/tasks/<id>": "Task aktualisieren",
                 "POST /api/tasks/<id>/done": "Task als erledigt markieren"
             },
+            # Beschreibung der Appointment API
             "appointments": {
                 "GET /api/customers/<customer_id>/appointments": "Termine eines Kunden abrufen",
                 "POST /api/customers/<customer_id>/appointments": "Termin anlegen",

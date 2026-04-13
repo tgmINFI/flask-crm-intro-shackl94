@@ -24,9 +24,13 @@
                         <li class="nav-item">
                             <a href="{{ url_for('leads') }}" class="nav-link">Leads</a>
                         </li>
+                        {% if current_user.role == "admin" %}
+                            <!-- Dieser Link erscheint im Header-Menü der Webseite -->
+                            <!-- url_for('api_docs') erzeugt automatisch die URL zur Flask Route api_docs()-->
                         <li class="nav-item">
                             <a href="{{ url_for('api_docs') }}" class="nav-link">API Docs</a>
                         </li>
+                        {% endif %}
 
                         {% if current_user.role == "admin" %}
                         <li class="nav-item">
